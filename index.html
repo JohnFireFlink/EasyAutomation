@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automation Runner</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input, select, button { margin: 8px; padding: 5px; }
+    #scriptList { margin-top: 20px; }
+    .step { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>EasyAutomation UI</h2>
+
+  <label>Keyword:</label>
+  <select id="keyword" onchange="updateInputFields()">
+    <option value="open">OpenWebApp</option>
+    <option value="click">ClickElement</option>
+    <option value="getText">GetText</option>
+    <option value="quit">QuitBrowser</option>
+  </select>
+
+  <div id="params"></div>
+
+  <br>
+  <button onclick="addToScript()">Add to Script</button>
+  <button onclick="runScript()">▶ Play</button>
+
+  <h3>Script Queue:</h3>
+  <div id="scriptList"></div>
+
+  <script>
+    const scriptQueue = [];
+
+    // Define which inputs each keyword requires
+    const inputMap = {
+      open: ["url"],
+      click: ["locator"],
+      getText: ["locator"],
+      quit: []
+    };
+
+    function updateInputFields() {
+      const keyword = document.getElementById('keyword').value;
+      const container = document.getElementById('params');
+      container.innerHTML = ""; // Clear previous
+
+      const inputs = inputMap[keyword];
+      inputs.forEach(input => {
+        const inputElement = document.createElement('input');
+        inputElement.type = "text";
+        inputElement.placeholder = input.charAt(0).toUpperCase() + input.slice(1);
+        inputElement.id = input;
+        container.appendChild(inputElement);
+      });
+    }
+
+    function addToScript() {
+      const keyword = document.getElementById('keyword').value;
+      const data = {};
+
+      (inputMap[keyword] || []).forEach(input => {
+        const val = document.getElementById(input).value;
+        if (val) data[input] = val;
+      });
+
+      scriptQueue.push({ keyword, data });
+
+      const display = `Step ${scriptQueue.length}: ${keyword} ${JSON.stringify(data)}`;
+      const div = document.createElement('div');
+      div.className = "step";
+      div.innerText = display;
+      document.getElementById('scriptList').appendChild(div);
+
+      updateInputFields(); // Clear inputs after adding
+    }
+
+    async function runScript() {
+      for (const step of scriptQueue) {
+        let url = "";
+        let body = step.data;
+
+        if (step.keyword === "open") {
+          url = "http://localhost:8080/karthick/open";
+        } else if (step.keyword === "click") {
+          url = "http://localhost:8080/karthick/click";
+        } else if (step.keyword === "getText") {
+          url = "http://localhost:8080/karthick/getText";
+        } else if (step.keyword === "quit") {
+          url = "http://localhost:8080/karthick/quit";
+          body = null;
+        }
+
+        try {
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: body ? JSON.stringify(body) : null
+          });
+          console.log(`Executed: ${step.keyword}`);
+        } catch (err) {
+          console.error(`Error in step ${step.keyword}:`, err);
+        }
+      }
+
+      alert("Script execution completed.");
+    }
+
+    // Initialize with first option
+    window.onload = updateInputFields;
+  </script>
+
+</body>
+</html>
