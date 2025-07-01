@@ -21,6 +21,8 @@
     <option value="enterInput">EnterInput</option>
     <option value="setImplicit">SetImplicitWait</option>
     <option value="quit">QuitBrowser</option>
+    <option value="waitForSec">WaitForSeconds</option>
+    <option value="setDelay">SetDelay</option>
   </select>
 
   <div id="params"></div>
@@ -41,7 +43,9 @@
       click: ["locator"],
       enterInput: ["locator","input"],
       setImplicit: ["waitSeconds"],
-      quit: []
+      quit: [],
+      waitForSec:["waitSeconds"],
+      setDelay:["waitSeconds"]
     };
 
     function updateInputFields() {
@@ -93,7 +97,11 @@
           url = "http://localhost:8080/karthick/enterInput";
         }else if (step.keyword === "setImplicit") {
           url = "http://localhost:8080/karthick/setImplicitWait";
-        } else if (step.keyword === "quit") {
+        }else if (step.keyword === "setDelay") {
+          url = "http://localhost:8080/karthick/setDelay";
+        }else if (step.keyword === "waitForSec") {
+          url = "http://localhost:8080/karthick/waitForSeconds";
+        }else if (step.keyword === "quit") {
           url = "http://localhost:8080/karthick/quit";
           body = null;
         }
